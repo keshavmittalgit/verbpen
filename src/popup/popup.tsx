@@ -1,10 +1,14 @@
 import React from "react";
+// import Button from '@material-ui/core/Button';
+import { Button } from "@/components/ui/button"
+import { LoginForm } from "@/components/login-form"
+
 import './popup.css'
 
 const Popup = () => {
     return (
-        <div>
-            <h1 className="text-4xl text-green-500">Hello World</h1>
+        <div className="flex justify-center items-center w-full h-[100vh] bg-black class">
+            <LoginForm className="dark" />
         </div>
     )
 };
