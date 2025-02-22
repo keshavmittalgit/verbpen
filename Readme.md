@@ -1,4 +1,4 @@
-# ReactJS Chrome Extension
+# VerbPen Chrome Extension
 
 ## React 18 and TailwindCSS Supported
 
