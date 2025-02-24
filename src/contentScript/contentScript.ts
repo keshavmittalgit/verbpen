@@ -1,16 +1,16 @@
 // Create and style a floating div to display captured text and include a Clear button
+import './content.css';
+
+
+
+
+console.log('Content script loaded');
+
+
+
 const floatingBox = document.createElement('div');
-floatingBox.style.position = 'fixed';
-floatingBox.style.top = '100px';
-floatingBox.style.right = '100px';
-floatingBox.style.padding = '10px';
-floatingBox.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-floatingBox.style.color = '#fff';
-floatingBox.style.borderRadius = '4px';
-floatingBox.style.zIndex = '10000';
-floatingBox.style.display = 'flex';
-floatingBox.style.flexDirection = 'column';
-floatingBox.style.gap = '10px';
+floatingBox.classList.add('floating-box');
+
 
 // Create a container for text display
 const textDisplay = document.createElement('div');
@@ -20,13 +20,12 @@ floatingBox.appendChild(textDisplay);
 // Create a "Clear" button to delete/clear the content
 const clearButton = document.createElement('button');
 clearButton.textContent = 'Clear';
-clearButton.style.padding = '5px';
-clearButton.style.border = 'none';
-clearButton.style.borderRadius = '4px';
-clearButton.style.cursor = 'pointer';
+clearButton.classList.add('clear-button');
+
+
 clearButton.addEventListener('click', () => {
   // Attempt to clear the content of the active element
-  const activeEl = document.activeElement as HTMLElement;
+  const activeEl = document.activeElement;
   if (activeEl) {
     if (activeEl instanceof HTMLTextAreaElement) {
       activeEl.value = '';
@@ -41,6 +40,7 @@ clearButton.addEventListener('click', () => {
     }
   }
   updateCapturedText('');
+
 });
 floatingBox.appendChild(clearButton);
 
@@ -51,7 +51,7 @@ document.body.appendChild(floatingBox);
  * Checks if an input element is valid for capturing text,
  * excluding types like "password" and "email".
  */
-function isValidTextInput(el: Element): boolean {
+function isValidTextInput(el) {
   if (el instanceof HTMLInputElement) {
     const type = el.type.toLowerCase();
     return type !== 'password' && type !== 'email' && (
@@ -68,8 +68,8 @@ function isValidTextInput(el: Element): boolean {
 /**
  * Traverses up the DOM tree to find the closest contenteditable container.
  */
-function getEditableContainer(element: HTMLElement): HTMLElement | null {
-  let el: HTMLElement | null = element;
+function getEditableContainer(element) {
+  let el = element;
   while (el && !el.isContentEditable) {
     el = el.parentElement;
   }
@@ -79,31 +79,39 @@ function getEditableContainer(element: HTMLElement): HTMLElement | null {
 /**
  * Updates the text displayed in the floating box.
  */
-function updateCapturedText(text: string) {
+function updateCapturedText(text) {
   textDisplay.textContent = text || 'Captured text will appear here';
+  if(text){
+    chrome.runtime.sendMessage({ action: 'processData', data: { text: text } });
+  }
 }
 
 /**
  * Handles capturing text from the event target.
+ * A small delay is added to allow any internal updates (such as Gmail's) to complete.
  */
-function handleCaptureEvent(event: Event) {
-  let target = event.target as HTMLElement;
-  let capturedText = '';
-
-  if (target instanceof HTMLTextAreaElement) {
-    capturedText = target.value;
-  } else if (target instanceof HTMLInputElement && isValidTextInput(target)) {
-    capturedText = target.value;
-  } else {
-    const editableContainer = getEditableContainer(target);
-    if (editableContainer) {
-      capturedText = editableContainer.innerText;
+function handleCaptureEvent(event) {
+  setTimeout(() => {
+    let target = event.target;
+    let capturedText = '';
+  
+    if (target instanceof HTMLTextAreaElement) {
+      capturedText = target.value;
+    } else if (target instanceof HTMLInputElement && isValidTextInput(target)) {
+      capturedText = target.value;
+    } else {
+      const editableContainer = getEditableContainer(target);
+      if (editableContainer) {
+        capturedText = editableContainer.innerText;
+      }
     }
-  }
-  updateCapturedText(capturedText);
+    updateCapturedText(capturedText);
+  }, 0);
 }
 
-// Listen for focus events (when you click into an input) and input events to capture changes.
-// Using the capture phase to catch events from nested elements.
+// Listen for various events to capture text changes
 document.addEventListener('focusin', handleCaptureEvent, true);
 document.addEventListener('input', handleCaptureEvent, true);
+document.addEventListener('keyup', handleCaptureEvent, true);
+document.addEventListener('compositionend', handleCaptureEvent, true);
+
