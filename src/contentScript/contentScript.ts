@@ -7,6 +7,7 @@ import './content.css';
 console.log('Content script loaded');
 
 
+let capturedText = '';
 
 const floatingBox = document.createElement('div');
 floatingBox.classList.add('floating-box');
@@ -25,6 +26,9 @@ clearButton.classList.add('clear-button');
 
 clearButton.addEventListener('click', () => {
   // Attempt to clear the content of the active element
+  if(capturedText){
+    chrome.runtime.sendMessage({ action: 'processData', data: { text: capturedText } });
+  }
   const activeEl = document.activeElement;
   if (activeEl) {
     if (activeEl instanceof HTMLTextAreaElement) {
@@ -81,9 +85,7 @@ function getEditableContainer(element) {
  */
 function updateCapturedText(text) {
   textDisplay.textContent = text || 'Captured text will appear here';
-  if(text){
-    chrome.runtime.sendMessage({ action: 'processData', data: { text: text } });
-  }
+  
 }
 
 /**
@@ -93,7 +95,7 @@ function updateCapturedText(text) {
 function handleCaptureEvent(event) {
   setTimeout(() => {
     let target = event.target;
-    let capturedText = '';
+    
   
     if (target instanceof HTMLTextAreaElement) {
       capturedText = target.value;
