@@ -1,9 +1,6 @@
 // Create and style a floating div to display captured text and include a Clear button
 import './content.css';
 
-
-
-
 console.log('Content script loaded');
 
 
@@ -22,6 +19,7 @@ floatingBox.appendChild(textDisplay);
 const clearButton = document.createElement('button');
 clearButton.textContent = 'Clear';
 clearButton.classList.add('clear-button');
+
 
 
 clearButton.addEventListener('click', () => {
@@ -48,6 +46,18 @@ clearButton.addEventListener('click', () => {
 });
 floatingBox.appendChild(clearButton);
 
+const button = document.createElement('button');
+button.textContent = 'Replace Text';
+button.classList.add('replace-button');
+
+button.addEventListener('click', () => {
+  // Attempt to clear the content of the active element
+  textDisplay.textContent = 'Replace text';
+  
+});
+
+
+floatingBox.appendChild(button);
 // Append the floating box to the document
 document.body.appendChild(floatingBox);
 
