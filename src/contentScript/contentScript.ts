@@ -25,10 +25,11 @@ clearButton.classList.add('clear-button');
 
 
 clearButton.addEventListener('click', () => {
-  // Attempt to clear the content of the active element
-  if(capturedText){
+  //send captured text to background.js
+  if(capturedText.length > 2){
     chrome.runtime.sendMessage({ action: 'processData', data: { text: capturedText } });
   }
+  // Attempt to clear the content of the active element
   const activeEl = document.activeElement;
   if (activeEl) {
     if (activeEl instanceof HTMLTextAreaElement) {
