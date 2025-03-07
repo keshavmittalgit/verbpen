@@ -7,7 +7,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     // Process the message as needed
     // ...
-   
     
   }
   // Return true if you plan to send a response asynchronously.

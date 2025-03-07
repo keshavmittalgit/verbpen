@@ -5,6 +5,7 @@ console.log('Content script loaded');
 
 
 let capturedText = '';
+//let newText = 'Changed Text';
 
 const floatingBox = document.createElement('div');
 floatingBox.classList.add('floating-box');
@@ -46,19 +47,29 @@ clearButton.addEventListener('click', () => {
 });
 floatingBox.appendChild(clearButton);
 
+
+function changeTextFields() {
+  document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      (el as HTMLInputElement).value = "Changed Text";
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  
+  //document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+     // (el as HTMLElement).innerText = "Changed Text";
+     // el.dispatchEvent(new Event('input', { bubbles: true }));
+ // });
+}
+
+
 const button = document.createElement('button');
 button.textContent = 'Replace Text';
 button.classList.add('replace-button');
 
-button.addEventListener('click', () => {
-  // Attempt to clear the content of the active element
-  textDisplay.textContent = 'Replace text';
-  
-});
 
+button.addEventListener('click', changeTextFields);
 
-floatingBox.appendChild(button);
 // Append the floating box to the document
+floatingBox.appendChild(button);
 document.body.appendChild(floatingBox);
 
 /**
@@ -120,6 +131,8 @@ function handleCaptureEvent(event) {
     updateCapturedText(capturedText);
   }, 0);
 }
+
+
 
 // Listen for various events to capture text changes
 document.addEventListener('focusin', handleCaptureEvent, true);
