@@ -1,3 +1,5 @@
+import { CodeSquare } from "lucide-react";
+
 console.log('Background script loaded');
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -5,7 +7,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // The sender object contains tab information when sent from a content script
     const tabId = sender.tab ? sender.tab.id : null;
     console.log('Received data from tab:', tabId, message.data);
-    
+    console.log(message.data.text);
     // Process the message as needed
     // ...
 
