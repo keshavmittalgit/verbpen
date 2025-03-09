@@ -1,4 +1,4 @@
-// Create and style a floating div to display captured text and include a Clear button
+// content.js
 import "./content.css";
 
 console.log("Content script loaded");
@@ -6,87 +6,19 @@ console.log("Content script loaded");
 let capturedText = "";
 let lastActiveElement = null;
 
-//let newText = 'Changed Text';
-
+// Create the floating box
 const floatingBox = document.createElement("div");
 floatingBox.classList.add("floating-box");
+// Basic styling to ensure it's on top
+floatingBox.style.position = "fixed";
+floatingBox.style.top = "10px";
+floatingBox.style.left = "10px";
+floatingBox.style.zIndex = "999999"; // High z-index
 
-// Create a container for text display
 const textDisplay = document.createElement("div");
 textDisplay.textContent = "Captured text will appear here";
 floatingBox.appendChild(textDisplay);
 
-// Create a "Clear" button to delete/clear the content
-// const clearButton = document.createElement('button');
-// clearButton.textContent = 'Clear';
-// clearButton.classList.add('clear-button');
-
-// clearButton.addEventListener('click', () => {
-//   // Attempt to clear the content of the active element
-//   if(capturedText){
-//     chrome.runtime.sendMessage({ action: 'processData', data: { text: capturedText } });
-//   }
-//   const activeEl = document.activeElement;
-//   if (activeEl) {
-//     if (activeEl instanceof HTMLTextAreaElement) {
-//       activeEl.value = '';
-//     } else if (activeEl instanceof HTMLInputElement && isValidTextInput(activeEl)) {
-//       activeEl.value = '';
-//     } else {
-//       // For contenteditable elements, find the closest container and clear it
-//       const editable = getEditableContainer(activeEl);
-//       if (editable) {
-//         editable.innerText = '';
-//       }
-//     }
-//   }
-//   updateCapturedText('');
-
-// });
-// floatingBox.appendChild(clearButton);
-
-// function changeTextFields() {
-//   document.querySelectorAll('input[type="text"], textarea').forEach(el => {
-//       (el as HTMLInputElement).value = "Changed Text";
-//       // el.dispatchEvent(new Event('input', { bubbles: true }));
-//   });
-
-//   document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-//      (el as HTMLElement).innerText = "Changed Text";
-//     //  el.dispatchEvent(new Event('input', { bubbles: true }));
-//  });
-// }
-
-function changeTextFields() {
-  if (lastActiveElement) {
-    if (lastActiveElement instanceof HTMLTextAreaElement) {
-      lastActiveElement.value = "Changed Text";
-    } else if (lastActiveElement instanceof HTMLInputElement && isValidTextInput(lastActiveElement)) {
-      lastActiveElement.value = "Changed Text";
-    } else {
-      // For contenteditable elements, find the closest container and change it
-      const editable = getEditableContainer(lastActiveElement);
-      if (editable) {
-        editable.innerText = "Changed Text";
-      }
-    }
-  }
-}
-
-const button = document.createElement("button");
-button.textContent = "Replace Text";
-button.classList.add("replace-button");
-
-button.addEventListener("click", changeTextFields);
-
-// Append the floating box to the document
-floatingBox.appendChild(button);
-document.body.appendChild(floatingBox);
-
-/**
- * Checks if an input element is valid for capturing text,
- * excluding types like "password" and "email".
- */
 function isValidTextInput(el) {
   if (el instanceof HTMLInputElement) {
     const type = el.type.toLowerCase();
@@ -100,12 +32,16 @@ function isValidTextInput(el) {
         type === "number")
     );
   }
-  return false;
+  return el instanceof HTMLTextAreaElement;
 }
 
-/**
- * Traverses up the DOM tree to find the closest contenteditable container.
- */
+// Use the native value setter to ensure React/Angular/Google watchers fire
+function setNativeValue(element, value) {
+  const prototype = Object.getPrototypeOf(element);
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+  descriptor?.set?.call(element, value);
+}
+
 function getEditableContainer(element) {
   let el = element;
   while (el && !el.isContentEditable) {
@@ -114,43 +50,126 @@ function getEditableContainer(element) {
   return el;
 }
 
-/**
- * Updates the text displayed in the floating box.
- */
-function updateCapturedText(text) {
-  textDisplay.textContent = text || "Captured text will appear here";
+function drillDownDiv(element) {
+  let el = element;
+  while (el.children && el.children.length > 0) {
+    el = el.lastElementChild;
+  }
+  return el;
 }
 
-/**
- * Handles capturing text from the event target.
- * A small delay is added to allow any internal updates (such as Gmail's) to complete.
- */
-function handleCaptureEvent(event) {
-  setTimeout(() => {
-    let target = event.target;
+function changeTextFields() {
+  if (!lastActiveElement) return;
 
+  const newText = "Changed Text";
+
+  // If it's a valid <input> or <textarea>, set using the native setter
+  if (
+    (lastActiveElement instanceof HTMLTextAreaElement && isValidTextInput(lastActiveElement)) ||
+    (lastActiveElement instanceof HTMLInputElement && isValidTextInput(lastActiveElement))
+  ) {
+    setNativeValue(lastActiveElement, newText);
+    // Dispatch events so the page recognizes the change
+    lastActiveElement.dispatchEvent(new Event("input", { bubbles: true }));
+    lastActiveElement.dispatchEvent(new Event("change", { bubbles: true }));
+  } else {
+    // If it's a contenteditable container
+    const editable = getEditableContainer(lastActiveElement);
+    if (!editable) return;
+
+    if (editable.children.length === 0) {
+      editable.innerText = newText;
+    } else {
+      const deepestElement = drillDownDiv(editable);
+      deepestElement.innerText = newText;
+    }
+    editable.dispatchEvent(new Event("input", { bubbles: true }));
+    editable.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  textDisplay.textContent = newText;
+}
+
+function handleCaptureEvent(event) {
+  // Delay to let the target update
+  setTimeout(() => {
+    const target = event.target;
     if (
-      target instanceof HTMLTextAreaElement ||
-      (target instanceof HTMLInputElement && isValidTextInput(target)) ||
-      getEditableContainer(target)
+      (target instanceof HTMLTextAreaElement && isValidTextInput(target)) ||
+      (target instanceof HTMLInputElement && isValidTextInput(target))
     ) {
       lastActiveElement = target;
-    }
-    if (target instanceof HTMLTextAreaElement) {
-      capturedText = target.value;
-    } else if (target instanceof HTMLInputElement && isValidTextInput(target)) {
       capturedText = target.value;
     } else {
       const editableContainer = getEditableContainer(target);
       if (editableContainer) {
+        lastActiveElement = editableContainer;
         capturedText = editableContainer.innerText;
       }
     }
-    updateCapturedText(capturedText);
-  }, 0);
+
+    textDisplay.textContent = capturedText || "Captured text will appear here";
+  }, 10);
 }
 
-// Listen for various events to capture text changes
+// Create the Replace Text button
+const button = document.createElement("button");
+button.textContent = "Replace Text";
+button.classList.add("replace-button");
+button.addEventListener("click", changeTextFields);
+floatingBox.appendChild(button);
+
+// Create a toggle (minimize) button
+const toggleButton = document.createElement("button");
+toggleButton.textContent = "–";
+toggleButton.classList.add("toggle-button");
+toggleButton.addEventListener("click", () => {
+  if (textDisplay.style.display === "none") {
+    textDisplay.style.display = "block";
+    button.style.display = "block";
+    toggleButton.textContent = "–";
+  } else {
+    textDisplay.style.display = "none";
+    button.style.display = "none";
+    toggleButton.textContent = "+";
+  }
+});
+floatingBox.appendChild(toggleButton);
+
+// Draggable floating box
+let isDragging = false;
+let offsetX, offsetY;
+
+floatingBox.addEventListener("mousedown", (e) => {
+  // Only drag if clicked directly on the box (not on a button)
+  if (e.target === floatingBox || e.target === textDisplay) {
+    isDragging = true;
+    offsetX = e.clientX - floatingBox.getBoundingClientRect().left;
+    offsetY = e.clientY - floatingBox.getBoundingClientRect().top;
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isDragging) {
+    floatingBox.style.left = e.clientX - offsetX + "px";
+    floatingBox.style.top = e.clientY - offsetY + "px";
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+});
+
+// Append the box after DOM is ready
+if (document.body) {
+  document.body.appendChild(floatingBox);
+} else {
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.appendChild(floatingBox);
+  });
+}
+
+// Listen for focus and input events to capture text
 document.addEventListener("focusin", handleCaptureEvent, true);
 document.addEventListener("input", handleCaptureEvent, true);
 document.addEventListener("keyup", handleCaptureEvent, true);
