@@ -1,25 +1,6 @@
-.floating-box {
-    position: fixed;
-    top: 100px;
-    right: 100px;
-    padding: 10px;
-    background-color: rgba(23, 23, 23, 0.318);
-    color: #fff;
-    border-radius: 4px;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 70px;
-    
-  }
-
-
-  .clear-button {
-  padding: 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: white;
-  color: black;
+.floating-box{
+  all: unset;
 }
+
+
+

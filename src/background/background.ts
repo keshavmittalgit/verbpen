@@ -19,8 +19,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function callAPI(inputText) {
-  const apiKey = 'AIzaSyCHFUnmzmG4eB9-NUfFnhsUOqqc3AbhKhU'; // Use your provided API key.
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+   // Use your provided API key.
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.API_KEY}`;
 
   const payload = {
     contents: [{
@@ -47,4 +47,4 @@ async function callAPI(inputText) {
 }
 
 // Example usage:
-callAPI("Hello");
+callAPI("can you fix the spelling in this and gramar of this text and only return the current text just the text noting else {i want to working with m calss teacher and she is not good}");

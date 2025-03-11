@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "react-boilerplate",
-    "description": "react-boilerplate for chrome extension",
+    "name": "verbpen",
+    "description": "verbpen for chrome extension",
     "version": "1.0.0",
     "action" : {
         "default_popup": "popup.html",
@@ -10,10 +10,9 @@
     },
     
     "permissions": [
-        "tabs",
-        "bookmarks",
         "storage",
-        "identity"
+        "identity",
+        "activeTab"
     ],
     "icons": {
         "16" : "icon.png",
