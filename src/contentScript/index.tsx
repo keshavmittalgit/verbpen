@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-// import "../assets/tailwind.css";
+import '../assets/styles.scss';
 import ContentScript from "./contentScript";
 
 function init() {
@@ -12,7 +12,7 @@ function init() {
     document.body.appendChild(appContainer);
     const root = createRoot(appContainer);
     console.log(appContainer);
-    root.render(<ContentScript />);
+    root.render(<div id='verbpen'><ContentScript/></div>);
 }
 
 init();

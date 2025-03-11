@@ -1,6 +1,7 @@
 // FloatingBox.tsx
 import React, { useState, useEffect, useRef } from "react";
-import "./content.css";
+// import "./content.css";
+import "../assets/styles.scss";
 
 const FloatingBox: React.FC = () => {
   const [capturedText, setCapturedText] = useState("Captured text will appear here");
@@ -132,13 +133,12 @@ const FloatingBox: React.FC = () => {
   return (
     <div
       ref={boxRef}
-      style={{all: "unset", position: "fixed", top: "28px", left: "28px", zIndex: 99999}}
-      className="bg-red-500 text-white p-2 rounded-lg shadow-lg w-24 h-24 fixed top-28 left-28 z-[99999] font-serif"
+      className="verbpen-floating-box"
     >
-      <div className="overflow-hidden h-10 w-full">
+      <div className="verbpen-text-capture">
         {capturedText || "Captured text will appear here"}
       </div>
-      <button className="bg-gray-900 rounded-md px-2 py-1" onClick={changeTextFields}>
+      <button className="bg-gray-600 rounded-[5px] px-2 py-1 text-white" onClick={changeTextFields}>
         Replace
       </button>
     </div>
