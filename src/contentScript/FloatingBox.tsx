@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "../assets/styles.scss";
 
 const FloatingBox: React.FC = () => {
-  const [capturedText, setCapturedText] = useState("Captured text will appear here");
+  const [capturedText, setCapturedText] = useState("empty");
   const lastActiveElement = useRef<HTMLElement | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
@@ -38,31 +38,37 @@ const FloatingBox: React.FC = () => {
   }
 
   function drillDownDiv(element: HTMLElement): HTMLElement {
-    let el: HTMLElement = element;
-    while (el.children && el.children.length > 0) {
-      el = el.lastElementChild as HTMLElement;
+    while (element.children && element.children.length > 0) {
+      element = element.lastElementChild as HTMLElement;
     }
-    return el;
+    return element;
   }
 
   // Directly update the target element's text content
   function changeTextFields() {
     if (!lastActiveElement.current) return;
-    const newText = "Changed Text";
-
-    if (
-      lastActiveElement.current instanceof HTMLInputElement ||
-      lastActiveElement.current instanceof HTMLTextAreaElement
-    ) {
-      lastActiveElement.current.value = newText;
-    } else {
-      const editable = getEditableContainer(lastActiveElement.current);
-      if (!editable) return;
-      const targetElement =
-        editable.children.length === 0 ? editable : drillDownDiv(editable);
-      targetElement.innerText = newText;
-    }
-    setCapturedText(newText);
+    let newText = "";
+    chrome.runtime.sendMessage(
+      { action: "processData", data: { text: capturedText } },
+      (response) => {
+        newText = response.text;
+        if (
+          lastActiveElement.current instanceof HTMLInputElement ||
+          lastActiveElement.current instanceof HTMLTextAreaElement
+        ) {
+          lastActiveElement.current.focus();
+          lastActiveElement.current.value = newText;
+          console.log(lastActiveElement.current, "caught by first if");
+        } else {
+          const editable = getEditableContainer(lastActiveElement.current);
+          if (!editable) return;
+          editable.focus();
+          editable.innerText = newText;
+          console.log();
+        }
+        setCapturedText(newText);
+      }
+    );
   }
 
   // Capture events to update the active element and its text
@@ -82,7 +88,23 @@ const FloatingBox: React.FC = () => {
           setCapturedText(editableContainer.innerText);
         }
       }
-    }, 10);
+    }, 1);
+  }
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      console.log("Text copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+    
+  }
+
+  // Example usage:
+
+  function copytoclipbaord() {
+    let text = "text copied";
+    copyToClipboard("This text will be copied to the clipboard");
   }
 
   useEffect(() => {
@@ -134,12 +156,19 @@ const FloatingBox: React.FC = () => {
     <div
       ref={boxRef}
       className="verbpen-floating-box"
+      style={{ zIndex: 2147483647 }}
     >
       <div className="verbpen-text-capture">
         {capturedText || "Captured text will appear here"}
       </div>
-      <button className="bg-gray-600 rounded-[5px] px-2 py-1 text-white" onClick={changeTextFields}>
+      <button
+        className="bg-gray-600 rounded-[5px] px-2 py-1 text-white"
+        onClick={changeTextFields}
+      >
         Replace
+      </button>
+      <button className="bg-black" onClick={copytoclipbaord}>
+        copy button
       </button>
     </div>
   );
