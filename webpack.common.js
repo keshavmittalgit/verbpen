@@ -46,7 +46,7 @@ module.exports = {
           'style-loader',
           {
             loader: 'css-loader',
-            options: { importLoaders: 2 }, // Processes @import resources with postcss and sass loaders
+            options: { importLoaders: 2 },
           },
           {
             loader: 'postcss-loader',
@@ -61,7 +61,8 @@ module.exports = {
         ],
       },
       {
-        type: 'assets/resource',
+        // Fixed asset type from "assets/resource" to "asset/resource"
+        type: 'asset/resource',
         test: /\.(png|jpg|jpeg|gif|woff|woff2|tff|eot|svg)$/,
       },
     ],
@@ -89,11 +90,11 @@ module.exports = {
   },
   optimization: {
     splitChunks: {
-      chunks(chunk) {
-        // Exclude the contentScript chunk from splitting
-        return chunk.name !== 'contentScript';
-      },
+      // Exclude the background and contentScript entries from being split into separate chunks
+      chunks: (chunk) => !['background', 'contentScript'].includes(chunk.name),
     },
+    // Bundle the runtime with each entry to ensure self-contained files
+    runtimeChunk: false,
   },
 };
 

@@ -13,5 +13,4 @@ function init() {
     console.log(appContainer)
     root.render(<Options />);
 }
-
 init();
