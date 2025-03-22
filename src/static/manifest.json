@@ -3,12 +3,15 @@
     "name": "verbpen",
     "description": "verbpen for chrome extension",
     "version": "1.0.0",
-    "action" : {
+    "action": {
         "default_popup": "popup.html",
         "default_title": "React Boilerplate",
-        "default_icon" : "icon.png"
+        "default_icon": {
+            "16": "icons/icon.png",
+            "48": "icons/icon.png",
+            "128": "icons/icon.png"
+        }
     },
-    
     "permissions": [
         "storage",
         "identity",
@@ -17,10 +20,11 @@
         "clipboardWrite"
     ],
     "icons": {
-        "16" : "icon.png",
-        "48" : "icon.png",
-        "128" : "icon.png"
+        "16": "icons/icon.png",
+        "48": "icons/icon.png",
+        "128": "icons/icon.png"
     },
+    
     "options_page": "options.html",
     "background": {
         "service_worker": "background.js"
@@ -28,7 +32,15 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["contentScript.js"]
+            "js": ["contentScript.js"],
+            "run_at": "document_end"
         }
-    ]
+    ],
+    "web_accessible_resources": [
+    {
+      "resources": ["button.js", "button.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+
 }

@@ -11,15 +11,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Eye, EyeOff, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { sign } from "crypto";
+import { Link } from "react-router-dom";
+
+
+
+
 
 export default function Signup({
   className,
 }: React.ComponentPropsWithoutRef<"div">) {
+
+  
+  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const navigate = useNavigate();
 
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
@@ -35,6 +47,8 @@ export default function Signup({
       met: req.regex.test(pass),
       text: req.text,
     }));
+
+   
   };
 
   const strength = checkStrength(password);
@@ -58,6 +72,7 @@ export default function Signup({
     return "Strong password";
   };
 
+  const goToLogin = () => { navigate("/login") };
   // Check if the confirm password field matches the password
   const isPasswordMatch = password === confirmPassword;
 
@@ -255,10 +270,10 @@ export default function Signup({
                 </div>
               </div>
               <div className="mt-4 text-center text-sm">
-                if you have an account?{" "}
-                <a href="/login" className="underline underline-offset-4">
-                  login
-                </a>
+                If you have an account?{" "}
+               <Link to="/login" className="underline underline-offset-4">
+                 Login
+               </Link>
               </div>
             </form>
           </CardContent>
