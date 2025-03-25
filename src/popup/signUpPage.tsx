@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Eye, EyeOff, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { sign } from "crypto";
+//import { useNavigate } from "react-router-dom";
+//import { sign } from "crypto";
 import { Link } from "react-router-dom";
+import { auth, signInWithEmailAndPassword} from '../firebase/firebase';
 
 
 
@@ -31,8 +32,6 @@ export default function Signup({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const navigate = useNavigate();
-
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
   // Check password against several regex requirements
@@ -72,12 +71,15 @@ export default function Signup({
     return "Strong password";
   };
 
-  const goToLogin = () => { navigate("/login") };
+
   // Check if the confirm password field matches the password
   const isPasswordMatch = password === confirmPassword;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit =async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setSubmitError(null);
     // Validate password meets all requirements.
     if (strengthScore < 4) {
       setSubmitError("Password does not meet all requirements.");
@@ -90,9 +92,29 @@ export default function Signup({
     }
     setSubmitError("");
     // Proceed with submission (e.g. API call) if validations pass.
-    console.log("Form submitted", { email, password });
-  };
+    //console.log("Form submitted", { email, password });
+    const formData ={
+      email:email,
+      password:password
+    }
 
+    //console.log("Submitting form data:", formData);
+     // Send data to background script
+      chrome.runtime.sendMessage(
+        { action: 'signupWithEmail', formData },
+        (response) => {
+          if (response?.success) {
+            console.log('Signup Successful:', response.user);
+            alert('Signup successful!');
+          } else {
+            console.error('Signup Failed:', response?.error);
+            alert(`Error: ${response?.error}`);
+          }
+        }
+      );
+    
+  
+};
   return (
     <div className="flex justify-center items-center w-full  ">
       <div className={cn("flex flex-col gap-6 w-full", className)}>
@@ -280,5 +302,4 @@ export default function Signup({
         </Card>
       </div>
     </div>
-  );
-}
+)};

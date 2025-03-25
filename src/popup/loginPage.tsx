@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button"
 import {app} from "@/firebase/firebase"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { Link } from "react-router-dom";
+import React, { useState } from "react"
+import { auth, googleProvider } from '@/firebase/firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 
 
@@ -19,11 +22,32 @@ import { Label } from "@/components/ui/label"
 
 
 
+
 export function LoginForm({
   className
 }: React.ComponentPropsWithoutRef<"div">) {
-  
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    console.log("Updated Email:", e.target.value); // Debugging log
+  };
+  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    console.log("Updated Password:", e.target.value); // Debugging log
+  };
+  const handleLogin =async (event: React.FormEvent) => {
+    event.preventDefault();
+    //console.log("Sending login details:", { email, password });
+    // Send data to background script
+    chrome.runtime.sendMessage({ action: "loginWithEmail", email, password }, (response) => {
+      console.log("Response from background:", response);
+    });
+  };
+  
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <Card>
@@ -34,7 +58,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -43,6 +67,9 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  onChange={handleEmailChange}
+                
+                  
                 />
               </div>
               <div className="grid gap-2">
@@ -51,16 +78,17 @@ export function LoginForm({
                   <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  
                   >
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" required onChange={handlePasswordChange}  />
               </div>
-              <Button type="submit" className="w-full" >
+              <Button type="submit" className="w-full"  >
                 Login
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" >
                 Login with Google
               </Button>
             </div>
@@ -77,4 +105,4 @@ export function LoginForm({
   )
 }
 
-export default LoginForm;
+//export default LoginForm; 2                                  

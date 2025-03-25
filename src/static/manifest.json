@@ -19,6 +19,9 @@
         "clipboardRead",
         "clipboardWrite"
     ],
+    "host_permissions": [
+    "https://*.firebaseapp.com/*"
+    ],
     "icons": {
         "16": "icons/icon.png",
         "48": "icons/icon.png",

@@ -20,6 +20,7 @@ function createButton() {
     left: 20px;  
     touch-action: none;
     user-select: none;
+   
   `;
 
   // Create the actual button
@@ -39,6 +40,7 @@ function createButton() {
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s, transform 0.2s;
+    border: 1px solid black;
   `;
 
   // Create the "V" letter icon

@@ -1,5 +1,8 @@
 import { get } from "http";
 import { CodeSquare } from "lucide-react";
+import { auth, createUserWithEmailAndPassword } from '@/firebase/firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 console.log("Background script loaded");
 
@@ -25,6 +28,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ text: "" });
       });
 
+      
     // Return true to indicate that we will send a response asynchronously.
     return true;
   }
@@ -65,4 +69,50 @@ async function getGeminiResponse(prompt, text) {
 //testing if the API call is working or not
 getGeminiResponse(PROMPT, "WHADHF").then((text) => {
   console.log(text);
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Check if this is a create account message
+  if (message.type === "CREATE_ACCOUNT") {
+    //console.log("Background script received CREATE_ACCOUNT request:", message.data);
+    // Extract the form data
+    const { email, password } = message.data; 
+    // Validate data (simple validation example)
+    if (!email || !password) {
+      console.error("Missing required fields");
+      sendResponse({ success: false, error: "Missing required fields" });
+      return true; // Keep the message channel open for the async response
+    }
+    
+    // Simulate processing delay
+    setTimeout(() => {
+      // Generate a mock user I
+      
+      // Log the "created" account
+      console.log("Account created:", {
+        email,
+        password,
+        createdAt: new Date().toISOString()
+      });
+      
+      // Send success response
+      sendResponse({
+        success: true,
+        message: "Account created successfully"
+      });
+    }, 1000);
+    
+    return true; // Keep the message channel open for the async response
+  }
+  
+  // If it's not a message we recognize, don't handle it
+  return false;
+});
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === "someOtherTask") {
+    console.log("Received message in background.js");
+    sendResponse({ success: true });
+  }
+  return true;
 });

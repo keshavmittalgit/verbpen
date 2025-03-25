@@ -14,7 +14,7 @@ import './popup.css'
 const Popup = () => {
     return (
         <MemoryRouter>
-      <div className="flex justify-center items-center w-full h-[100vh] bg-black dark">
+      <div className="flex justify-center items-center w-full h-[100%] bg-black dark">
         <Routes>
           <Route path="/" element={<Signup />} />
           <Route path="/login" element={<LoginForm />} />
